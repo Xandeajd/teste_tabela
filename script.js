@@ -202,6 +202,8 @@ async function saveData() {
 
 // Buscar dados no Google Sheets
 async function loadSavedData() {
+    accounts = [];
+    extraIncome = [];
     const payload = {
         action: "buscar",
         ano: parseInt(document.getElementById('year').value),
