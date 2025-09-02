@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('year').value = now.getFullYear();
     
     // Carregar dados salvos (se existirem)
-    loadSavedData();
+    // loadSavedData();
     
     // // Inicializar com alguns exemplos se não houver dados salvos
     // if (accounts.length === 0) {
