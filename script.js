@@ -229,6 +229,33 @@ async function loadSavedData() {
     }
 }
 
+function doPost(e) {
+  const dados = JSON.parse(e.postData.contents);
+  let resultado;
+
+  if (dados.action === "salvar") {
+    salvarDados(dados.ano, dados.mes, dados.dados);
+    resultado = { status: "ok" };
+  } else if (dados.action === "buscar") {
+    resultado = buscarDados(dados.ano, dados.mes);
+  } else {
+    resultado = { status: "erro", mensagem: "Ação inválida" };
+  }
+
+  // Retornar JSON + cabeçalhos de CORS
+  return ContentService
+    .createTextOutput(JSON.stringify(resultado))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  // Só para habilitar CORS em GET também
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: "ok" }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+
 // Reagir quando o usuário mudar o mês/ano
 document.getElementById('month').addEventListener('change', loadSavedData);
 document.getElementById('year').addEventListener('change', loadSavedData);
