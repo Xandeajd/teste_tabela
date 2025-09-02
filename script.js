@@ -3,6 +3,9 @@
 let accounts = [];
 let extraIncome = [];
 
+// URL do seu WebApp do Apps Script
+const API_URL = "SUA_URL_DO_WEBAPP"; // coloque aqui a URL do Apps Script
+
 // Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
     // Configurar event listeners
@@ -10,39 +13,18 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addIncomeBtn').addEventListener('click', addIncome);
     document.getElementById('salary').addEventListener('change', updateSummary);
     document.getElementById('printBtn').addEventListener('click', () => window.print());
-    
+
     // Configurar mês e ano atual
     const now = new Date();
     document.getElementById('month').value = now.getMonth();
     document.getElementById('year').value = now.getFullYear();
-    
-    // Carregar dados salvos (se existirem)
-    // loadSavedData();
-    
-    // // Inicializar com alguns exemplos se não houver dados salvos
-    // if (accounts.length === 0) {
-    //     accounts = [
-    //         { name: 'Aluguel', value: 1200 },
-    //         { name: 'Supermercado', value: 450 },
-    //         { name: 'Internet', value: 99.9 }
-    //     ];
-    // }
-    
-    // if (extraIncome.length === 0) {
-    //     extraIncome = [
-    //         { description: 'Freelance', value: 500 },
-    //         { description: 'Vendas online', value: 150 }
-    //     ];
-    // }
-    
+
+    // Carregar dados do mês/ano atual
+    loadSavedData();
+
     if (!document.getElementById('salary').value) {
         document.getElementById('salary').value = 3000;
     }
-    
-    // Atualizar as tabelas e o resumo
-    updateAccountsTable();
-    updateIncomeTable();
-    updateSummary();
 });
 
 // Função para formatar valores monetários
@@ -54,16 +36,16 @@ function formatMoney(value) {
 function addAccount() {
     const nameInput = document.getElementById('accountName');
     const valueInput = document.getElementById('accountValue');
-    
+
     const name = nameInput.value.trim();
     const value = parseFloat(valueInput.value);
-    
+
     if (name && !isNaN(value) && value > 0) {
         accounts.push({ name, value });
         updateAccountsTable();
         updateSummary();
         saveData();
-        
+
         // Limpar os campos
         nameInput.value = '';
         valueInput.value = '';
@@ -76,16 +58,16 @@ function addAccount() {
 function addIncome() {
     const descInput = document.getElementById('incomeDescription');
     const valueInput = document.getElementById('incomeValue');
-    
+
     const description = descInput.value.trim();
     const value = parseFloat(valueInput.value);
-    
+
     if (description && !isNaN(value) && value > 0) {
         extraIncome.push({ description, value });
         updateIncomeTable();
         updateSummary();
         saveData();
-        
+
         // Limpar os campos
         descInput.value = '';
         valueInput.value = '';
@@ -98,10 +80,10 @@ function addIncome() {
 function updateAccountsTable() {
     const tableBody = document.getElementById('accountsTableBody');
     tableBody.innerHTML = '';
-    
+
     accounts.forEach((account, index) => {
         const row = document.createElement('tr');
-        
+
         row.innerHTML = `
             <td>${account.name}</td>
             <td>${formatMoney(account.value)}</td>
@@ -109,10 +91,10 @@ function updateAccountsTable() {
                 <button class="btn-delete" data-index="${index}">Excluir</button>
             </td>
         `;
-        
+
         tableBody.appendChild(row);
     });
-    
+
     // Adicionar event listeners aos botões de excluir
     document.querySelectorAll('#accountsTableBody .btn-delete').forEach(button => {
         button.addEventListener('click', function() {
@@ -126,10 +108,10 @@ function updateAccountsTable() {
 function updateIncomeTable() {
     const tableBody = document.getElementById('incomeTableBody');
     tableBody.innerHTML = '';
-    
+
     extraIncome.forEach((income, index) => {
         const row = document.createElement('tr');
-        
+
         row.innerHTML = `
             <td>${income.description}</td>
             <td>${formatMoney(income.value)}</td>
@@ -137,10 +119,10 @@ function updateIncomeTable() {
                 <button class="btn-delete" data-index="${index}">Excluir</button>
             </td>
         `;
-        
+
         tableBody.appendChild(row);
     });
-    
+
     // Adicionar event listeners aos botões de excluir
     document.querySelectorAll('#incomeTableBody .btn-delete').forEach(button => {
         button.addEventListener('click', function() {
@@ -171,59 +153,27 @@ function updateSummary() {
     const totalAccounts = accounts.reduce((sum, account) => sum + account.value, 0);
     const totalIncome = extraIncome.reduce((sum, income) => sum + income.value, 0);
     const salary = parseFloat(document.getElementById('salary').value) || 0;
-    
+
     const finalBalance = salary - totalAccounts + totalIncome;
-    
+
     document.getElementById('totalAccounts').textContent = formatMoney(totalAccounts);
     document.getElementById('totalIncome').textContent = formatMoney(totalIncome);
-    
+
     const finalBalanceElement = document.getElementById('finalBalance');
     finalBalanceElement.textContent = formatMoney(finalBalance);
-    
+
     if (finalBalance >= 0) {
         finalBalanceElement.className = 'positive';
     } else {
         finalBalanceElement.className = 'negative';
     }
-    
+
     saveData();
 }
 
-// // Função para salvar dados no localStorage
-// function saveData() {
-//     const data = {
-//         accounts: accounts,
-//         extraIncome: extraIncome,
-//         salary: document.getElementById('salary').value
-//     };
-//     localStorage.setItem(getStorageKey(), JSON.stringify(data));
-// }
+// === Integração com Google Sheets ===
 
-// Função para carregar dados do localStorage
-// function loadSavedData() {
-//     const savedData = localStorage.getItem(getStorageKey());
-
-//     if (savedData) {
-//         const data = JSON.parse(savedData);
-//         accounts = data.accounts || [];
-//         extraIncome = data.extraIncome || [];
-//         document.getElementById('salary').value = data.salary || '';
-//     } else {
-//         accounts = [];
-//         extraIncome = [];
-//         document.getElementById('salary').value = '';
-//     }
-
-//     updateAccountsTable();
-//     updateIncomeTable();
-//     updateSummary();
-// }
-
-document.getElementById('month').addEventListener('change', loadSavedData);
-document.getElementById('year').addEventListener('change', loadSavedData);
-
-const API_URL = "https://script.google.com/macros/s/AKfycbxRW9icwOkeg5oTzy1MZWOha3QqfnAY9iQGUPNEulJ3naOJDqf13SZ9HNnORziLNJBN/exec"; // substitua pela URL do Apps Script
-
+// Salvar dados no Google Sheets
 async function saveData() {
     const data = {
         accounts,
@@ -250,6 +200,7 @@ async function saveData() {
     }
 }
 
+// Buscar dados no Google Sheets
 async function loadSavedData() {
     const payload = {
         action: "buscar",
@@ -271,8 +222,13 @@ async function loadSavedData() {
         updateAccountsTable();
         updateIncomeTable();
         updateSummary();
+
         console.log("Carregado do Google Sheets:", data);
     } catch (err) {
         console.error("Erro ao buscar:", err);
     }
 }
+
+// Reagir quando o usuário mudar o mês/ano
+document.getElementById('month').addEventListener('change', loadSavedData);
+document.getElementById('year').addEventListener('change', loadSavedData);
