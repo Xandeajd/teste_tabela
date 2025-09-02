@@ -189,40 +189,40 @@ function updateSummary() {
     saveData();
 }
 
-// Função para salvar dados no localStorage
-function saveData() {
-    const data = {
-        accounts: accounts,
-        extraIncome: extraIncome,
-        salary: document.getElementById('salary').value
-    };
-    localStorage.setItem(getStorageKey(), JSON.stringify(data));
-}
+// // Função para salvar dados no localStorage
+// function saveData() {
+//     const data = {
+//         accounts: accounts,
+//         extraIncome: extraIncome,
+//         salary: document.getElementById('salary').value
+//     };
+//     localStorage.setItem(getStorageKey(), JSON.stringify(data));
+// }
 
 // Função para carregar dados do localStorage
-function loadSavedData() {
-    const savedData = localStorage.getItem(getStorageKey());
+// function loadSavedData() {
+//     const savedData = localStorage.getItem(getStorageKey());
 
-    if (savedData) {
-        const data = JSON.parse(savedData);
-        accounts = data.accounts || [];
-        extraIncome = data.extraIncome || [];
-        document.getElementById('salary').value = data.salary || '';
-    } else {
-        accounts = [];
-        extraIncome = [];
-        document.getElementById('salary').value = '';
-    }
+//     if (savedData) {
+//         const data = JSON.parse(savedData);
+//         accounts = data.accounts || [];
+//         extraIncome = data.extraIncome || [];
+//         document.getElementById('salary').value = data.salary || '';
+//     } else {
+//         accounts = [];
+//         extraIncome = [];
+//         document.getElementById('salary').value = '';
+//     }
 
-    updateAccountsTable();
-    updateIncomeTable();
-    updateSummary();
-}
+//     updateAccountsTable();
+//     updateIncomeTable();
+//     updateSummary();
+// }
 
 document.getElementById('month').addEventListener('change', loadSavedData);
 document.getElementById('year').addEventListener('change', loadSavedData);
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxRW9icwOkeg5oTzy1MZWOha3QqfnAY9iQGUPNEulJ3naOJDqf13SZ9HNnORziLNJBN/exec"; // coloque a URL do Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbxRW9icwOkeg5oTzy1MZWOha3QqfnAY9iQGUPNEulJ3naOJDqf13SZ9HNnORziLNJBN/exec"; // substitua pela URL do Apps Script
 
 async function saveData() {
     const data = {
@@ -233,36 +233,46 @@ async function saveData() {
 
     const payload = {
         action: "salvar",
-        ano: document.getElementById('year').value,
-        mes: document.getElementById('month').value,
+        ano: parseInt(document.getElementById('year').value),
+        mes: parseInt(document.getElementById('month').value),
         dados: data
     };
 
-    await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        const result = await res.json();
+        console.log("Salvo no Google Sheets:", result);
+    } catch (err) {
+        console.error("Erro ao salvar:", err);
+    }
 }
 
 async function loadSavedData() {
     const payload = {
         action: "buscar",
-        ano: document.getElementById('year').value,
-        mes: document.getElementById('month').value
+        ano: parseInt(document.getElementById('year').value),
+        mes: parseInt(document.getElementById('month').value)
     };
 
-    const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
 
-    const data = await res.json();
+        accounts = data.accounts || [];
+        extraIncome = data.extraIncome || [];
+        document.getElementById('salary').value = data.salary || '';
 
-    accounts = data.accounts || [];
-    extraIncome = data.extraIncome || [];
-    document.getElementById('salary').value = data.salary || '';
-
-    updateAccountsTable();
-    updateIncomeTable();
-    updateSummary();
+        updateAccountsTable();
+        updateIncomeTable();
+        updateSummary();
+        console.log("Carregado do Google Sheets:", data);
+    } catch (err) {
+        console.error("Erro ao buscar:", err);
+    }
 }
