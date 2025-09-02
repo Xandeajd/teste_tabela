@@ -4,7 +4,7 @@ let accounts = [];
 let extraIncome = [];
 
 // URL do seu WebApp do Apps Script
-const API_URL = "SUA_URL_DO_WEBAPP"; // coloque aqui a URL do Apps Script
+const API_URL = "https://script.google.com/macros/s/AKfycbxRW9icwOkeg5oTzy1MZWOha3QqfnAY9iQGUPNEulJ3naOJDqf13SZ9HNnORziLNJBN/exec"; // coloque aqui a URL do Apps Script
 
 // Inicialização quando a página carrega
 document.addEventListener('DOMContentLoaded', function() {
